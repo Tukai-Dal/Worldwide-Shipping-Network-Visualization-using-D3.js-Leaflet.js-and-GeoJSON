@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+	<head>
+ 		<title>ShippingNetwork-Tukai</title>
+  		<meta charset="utf-8" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  		<link rel="stylesheet" href="https://d19vzq90twjlae.cloudfront.net/leaflet-0.7.1/leaflet.css" />
+  		<style>
+			  #map {
+			  position: absolute;
+			  top: 0;
+			  left: 0;
+			  width: 100%;
+			  height: 100%
+			 }
+		</style>
+	</head>
+	<body>
+  		<div id="map"></div>
+	</body>
+	<script src="https://d19vzq90twjlae.cloudfront.net/leaflet-0.7.1/leaflet.js?2"></script>
+	<script src="prepared_data.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/leaflet-textpath@1.2.0/leaflet.textpath.min.js"></script>
+	<script src="AnimatedMarker.js"></script>
+
+	<script type="text/javascript">
+
+		var InitialCenter = new L.LatLng(44, -63);
+		var map = L.map('map');
+		map.setView(InitialCenter, 3);
+		
+		var Mapbox = L.tileLayer('http://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		  attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+		  subdomains: '1234',
+		  maxZoom:15
+		}).addTo(map);;
+		
+		//function to check coords 
+		//map.on('click', function(e) {
+		//alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+		//});
+		
+		//function to draw an empty polyline
+		function visnet(shnet){
+		var polyline = L.polyline([],{
+			color:'Blue',
+			weight: '0.5',
+		}).addTo(map);
+		
+		//count points we've added to the map
+		var pointsAdded = 0;
+		var linea1 =shnet.features[0].geometry.coordinates;
+		var name = shnet.features[0].properties.name;
+		var code = shnet.features[0].properties.hs_code;
+		var codestext = "Commodity code:"
+		var codes = codestext.concat(code);
+		var newline = "</br>";
+		var info = name.concat(newline, codes);
+		var pointsTobeAdded= linea1.length
+
+		//adding new points to the map
+		add();
+		
+		
+
+		function add() {
+				
+			// addLatLng
+			polyline.addLatLng(
+	        	L.latLng(linea1[pointsAdded][1],linea1[pointsAdded][0])
+	        );
+			
+		    // pan the map
+			//if (shnet == orthodroma120)
+		    //map.setView([linea1[pointsAdded][1],linea1[pointsAdded][0]], 3);
+				
+			
+			if (++pointsAdded < pointsTobeAdded) window.setTimeout(add, 100);
+		};
+		
+		
+		lines= L.geoJson(shnet,{
+			onEachFeature:onEachFeature
+		});
+		
+		var lines, route, coorSalida, coorLlegada;
+
+		var myIcon = L.icon({
+		  iconUrl: 'ship.png',
+		  iconAnchor:  [20, 24],
+		});
+		
+		
+		
+		function onEachFeature(feature, layer) {
+			
+			var array = feature.geometry.coordinates
+			var myArray =[];
+			var last=array.length-1
+
+			coorSalida = [array[0][1], array[0][0]]
+			coorLlegada = [array[last][1], array[last][0]]
+			console.log('llegada: '+coorLlegada+' salida: '+coorSalida)
+		
+			for (var i = 0; i <= array.length-1; i++) {
+				console.log([array[i][1], array[i][0]]);
+				myArray.push([array[i][1], array[i][0]])
+			};
+			route = L.polyline(myArray);
+			console.log(route)
+			
+		}
+		var harborIcon = new L.Icon({
+		iconUrl: 'harbor.png',
+		shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+		iconSize: [25, 30],
+		iconAnchor: [12, 41],
+		popupAnchor: [1, -34],
+		shadowSize: [30, 30]
+		});
+		
+		var salida  = L.marker(coorSalida, {icon: harborIcon}).addTo(map);
+		var llegada = L.marker(coorLlegada, {icon: harborIcon}).addTo(map);
+		
+		
+		var animatedMarker = L.animatedMarker(route.getLatLngs(), {
+			icon: myIcon,
+		  	distance: 9200,  
+		  	interval: 10, 
+		}).addTo(map).bindPopup(info);
+
+let isClicked = false
+
+animatedMarker.on({
+    mouseover: function() {
+        if(!isClicked) {
+            this.openPopup()
+        }
+    },
+    mouseout: function() { 
+        if(!isClicked) {
+            this.closePopup()
+        }
+    },
+    click: function() {
+        isClicked = true
+        this.openPopup()
+    }
+})
+
+map.on ({
+    click: function() {
+        isClicked = false
+    },
+    popupclose: function () {
+        isClicked = false
+    }
+})
+		
+	}
+//Visualize per transaction. Max: 167. Shown: 10+
+//too many causes bit of lag so didn't write a loop for all the transactions
+		
+		visnet(orthodroma0);
+		visnet(orthodroma13);
+		visnet(orthodroma35);
+		visnet(orthodroma45);
+		visnet(orthodroma67);
+		visnet(orthodroma98);
+		visnet(orthodroma118);
+		visnet(orthodroma120);
+		visnet(orthodroma133);
+		visnet(orthodroma158);
+		visnet(orthodroma70);
+		visnet(orthodroma79);
+		visnet(orthodroma54);
+		visnet(orthodroma92);
+		visnet(orthodroma160);
+		visnet(orthodroma149);
+		visnet(orthodroma154);
+		visnet(orthodroma99);
+
+	
+	</script>
+  
+
+</html>
