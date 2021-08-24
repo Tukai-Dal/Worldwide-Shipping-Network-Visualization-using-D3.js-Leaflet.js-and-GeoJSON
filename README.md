@@ -17,4 +17,4 @@ The project can be divided in three parts: <br>
 
 The resulting visualization looks like this: 
 
-
+<img src="img/d3geo6406.jpg">
